@@ -191,9 +191,9 @@ class DigitClassificationModel(Model):
 
         # Remember to set self.learning_rate!
         # You may use any learning rate that works well for your architecture
-        self.learning_rate = 0.09
-        hidden_size = 400
-        hidden_size_2 = 400
+        self.learning_rate = 0.08
+        hidden_size = 350
+        hidden_size_2 = 350
 
         self.w_one = nn.Variable(784, hidden_size)
         self.w_two = nn.Variable(hidden_size, hidden_size_2)
@@ -236,13 +236,16 @@ class DigitClassificationModel(Model):
         graph = nn.Graph([self.w_one,self.b_one, self.w_two, self.b_two, self.w_three, self.b_three])
         input_i = nn.Input(graph, x)
         mul = nn.MatrixMultiply(graph, input_i, self.w_one)
+        graph.add(self.b_one)
         add = nn.MatrixVectorAdd(graph, mul, self.b_one)
         relu = nn.ReLU(graph, add)
         mul2 = nn.MatrixMultiply(graph, relu, self.w_two)
+        graph.add(self.b_two)
         add2 = nn.MatrixVectorAdd(graph, mul2, self.b_two)
 
         relu2 = nn.ReLU(graph, add2)
         mul3 = nn.MatrixMultiply(graph, relu2, self.w_three)
+        graph.add(self.b_three)
         add3 = nn.MatrixVectorAdd(graph, mul3, self.b_three)
 
 
@@ -253,7 +256,7 @@ class DigitClassificationModel(Model):
             # that the node belongs to. The loss node must be the last node
             # added to the graph.
             y_in = nn.Input(graph, y)
-            loss = nn.SoftmaxLoss(graph, add3, y_in)
+            loss = nn.SquareLoss(graph, add3, y_in)
             return graph
         else:
             # At test time, the correct output is unknown.
